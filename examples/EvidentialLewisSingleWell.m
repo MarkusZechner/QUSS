@@ -9,32 +9,48 @@
 close all; clear all; clc;
 addpath('../src/evidential/');
 addpath('../src/thirdparty/fda_matlab/');
-prior_path = '../data/evidential/Prior.mat';
+prior_path = '../data/evidential/PriorData.mat';
 load(prior_path);
+prior_path = '../data/evidential/PriorPrediction.mat';
+load(prior_path);
+
+%prior_path = '../data/evidential/Prior.mat';
+%load(prior_path);
+
+%% using only one well
+WellToKeep = 68;
+ObservedWellDataPrediction = PriorPrediction.data(1,:,WellToKeep);
+SimulatedWellDataPrediction = PriorPrediction.data(2:end,:,WellToKeep);
+PriorPrediction.data = [ObservedWellDataPrediction;SimulatedWellDataPrediction];
+WellName = PriorPrediction.ObjNames{1,WellToKeep}
+PriorPrediction.ObjNames = {WellName};
+
+
+
 
 %% Plot input responses
 FontSize = 20;
 
 
 % Set aside a realization to use as the "truth"
-TruthRealization = 12; 
+TruthRealization = 1; 
 NumPriorRealizations=length(PriorData.data);
 AvailableRealizations = setdiff(1:NumPriorRealizations,TruthRealization);
 
-PlotPriorResponses(PriorData,TruthRealization,FontSize);
+PlotResponses(PriorData,TruthRealization,FontSize);
 %PlotPriorResponses(PriorPrediction,TruthRealization,FontSize);
 
 %% Dimension Reduction On Both Data and Prediction Variables
 
 % Minimum numbeer of eigenvalues and % of variance to keep after dim
 % reduction
-MinEigenValues = 3; EigenTolerance = 0.97;
+MinEigenValues = 3; EigenTolerance = 0.95;
 
 % We first perform FPCA on both d and h
-PriorData.spline=[3 40]; % 3rd order spline with 40 knots
-PriorDataFPCA = ComputeHarmonicScores(PriorData,4);
-PriorPrediction.spline=[3 20]; % 3rd order spline with 20 knots
-PriorPredictionFPCA = ComputeHarmonicScores(PriorPrediction,0);
+PriorData.spline=[3 30]; % 3rd order spline with 40 knots
+PriorDataFPCA = ComputeHarmonicScores(PriorData,[],4);
+PriorPrediction.spline=[3 30]; % 3rd order spline with 20 knots
+PriorPredictionFPCA = ComputeHarmonicScores(PriorPrediction,[],4);
 
 % Perform Mixed PCA on FPCA components for d
 rmpath('../src/thirdparty/fda_matlab/');

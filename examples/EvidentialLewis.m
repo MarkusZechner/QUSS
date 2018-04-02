@@ -9,32 +9,64 @@
 close all; clear all; clc;
 addpath('../src/evidential/');
 addpath('../src/thirdparty/fda_matlab/');
-prior_path = '../data/evidential/Prior.mat';
+prior_path = '../data/evidential/PriorData.mat';
 load(prior_path);
+prior_path = '../data/evidential/PriorPrediction.mat';
+load(prior_path);
+
+%prior_path = '../data/evidential/Prior.mat';
+%load(prior_path);
+
+%% creating a field response
+
+% 
+% Data
+PriorRates = PriorData.data;
+PriorRatesObserved = PriorRates(1,:,:);
+PriorRatesSimulated = PriorRates(2:end,:,:);
+
+PriorFieldObserved = sum(PriorRatesObserved,3);
+PriorFieldSimulated = sum(PriorRatesSimulated,3);
+
+DataNewPrior = [PriorFieldObserved;PriorFieldSimulated];
+PriorData.data = DataNewPrior;
+PriorData.ObjNames = {'Field'};
+
+% Forecast
+PredictionRates = PriorPrediction.data;
+PredictionRatesObserved = PredictionRates(1,:,:);
+PredictionRatesSimulated = PredictionRates(2:end,:,:);
+
+PredictionFieldObserved = sum(PredictionRatesObserved,3);
+PredictionFieldSimulated = sum(PredictionRatesSimulated,3);
+
+DataNewPrediction = [PredictionFieldObserved;PredictionFieldSimulated];
+PriorPrediction.data = DataNewPrediction;
+PriorPrediction.ObjNames = {'Field'};
 
 %% Plot input responses
 FontSize = 20;
 
 
 % Set aside a realization to use as the "truth"
-TruthRealization = 12; 
+TruthRealization = 1; 
 NumPriorRealizations=length(PriorData.data);
 AvailableRealizations = setdiff(1:NumPriorRealizations,TruthRealization);
 
-PlotPriorResponses(PriorData,TruthRealization,FontSize);
+PlotResponses(PriorData,TruthRealization,FontSize);
 %PlotPriorResponses(PriorPrediction,TruthRealization,FontSize);
 
 %% Dimension Reduction On Both Data and Prediction Variables
 
 % Minimum numbeer of eigenvalues and % of variance to keep after dim
 % reduction
-MinEigenValues = 3; EigenTolerance = 0.97;
+MinEigenValues = 3; EigenTolerance = 0.90;
 
 % We first perform FPCA on both d and h
 PriorData.spline=[3 40]; % 3rd order spline with 40 knots
-PriorDataFPCA = ComputeHarmonicScores(PriorData,4);
+PriorDataFPCA = ComputeHarmonicScores(PriorData,[],4);
 PriorPrediction.spline=[3 20]; % 3rd order spline with 20 knots
-PriorPredictionFPCA = ComputeHarmonicScores(PriorPrediction,0);
+PriorPredictionFPCA = ComputeHarmonicScores(PriorPrediction,[],4);
 
 % Perform Mixed PCA on FPCA components for d
 rmpath('../src/thirdparty/fda_matlab/');
