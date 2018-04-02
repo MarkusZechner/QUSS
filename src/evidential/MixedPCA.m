@@ -23,10 +23,10 @@ norm_scores = [];
 for i = 1:num_wells
     % Perform regular PCA on each well
     [~,~,latent] = pca(FunctionalStruct{i}.harmscr);
-
+    
     % Normalize the PCA scores by the first singular value, which is the
     norm_score = FunctionalStruct{i}.harmscr/sqrt(latent(1));
-
+    
     % Concanate the norm_score
     norm_scores = [norm_scores norm_score];
 end
@@ -37,6 +37,12 @@ end
 % Compute explained variance
 explained = cumsum(explained)/sum(explained);
 
+plot(explained,'LineWidth',3)
+set(gcf,'color','w');
+%ylim([0 1])
+xlabel('Number of Eigencomponents');
+ylabel('Variance Explained');
+
 % Check number of components to keep
 eigenToKeep = 3;
 
@@ -45,6 +51,8 @@ if (eigentolerance<1)
 else
     ix = eigentolerance;
 end
+
+fprintf('%d Eigenvalues are use to describe %.2f of variance.\n',ix,eigentolerance);
 
 % Whether we set aside a truth realization
 if truth_real==0
