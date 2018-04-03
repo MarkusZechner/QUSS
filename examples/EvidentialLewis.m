@@ -1,3 +1,10 @@
+
+% This script is an example for:
+% Wells - Field or 
+% Field - Field
+% using Bsplines as the dim reduction method
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Evidential.m
 % Tutorial file on how to use Evidential Learning for forecasting future
 % prediction rates from historical production rates.
@@ -9,17 +16,28 @@
 close all; clear all; clc;
 addpath('../src/evidential/');
 addpath('../src/thirdparty/fda_matlab/');
+addpath('../src/thirdparty/export_fig/');
+
 prior_path = '../data/evidential/PriorData.mat';
 load(prior_path);
 prior_path = '../data/evidential/PriorPrediction.mat';
 load(prior_path);
 
-%prior_path = '../data/evidential/Prior.mat';
-%load(prior_path);
+% Saving the images
+BasePath = 'C:\Users\Markus Zechner\Documents\GitHub\QUSS\figures\EvidentialLearning';
+Case = 'OMV8TH_largerPrior';
+% Trial is a subfolder of Case
+Trial = 'AllWellsToField_FPCA_EigenTol090';
+
+% creating the figure folder
+SaveFig = 'On';
+[ FigureFolder ] = creatingFigureFolder(SaveFig, BasePath, Case, Trial);
+
+
 
 %% creating a field response
 
-% 
+
 % Data
 PriorRates = PriorData.data;
 PriorRatesObserved = PriorRates(1,:,:);
@@ -53,8 +71,8 @@ TruthRealization = 1;
 NumPriorRealizations=length(PriorData.data);
 AvailableRealizations = setdiff(1:NumPriorRealizations,TruthRealization);
 
-PlotResponses(PriorData,TruthRealization,FontSize);
-%PlotPriorResponses(PriorPrediction,TruthRealization,FontSize);
+%PlotResponses(PriorData,TruthRealization,FontSize);
+
 
 %% Dimension Reduction On Both Data and Prediction Variables
 
@@ -65,12 +83,15 @@ MinEigenValues = 3; EigenTolerance = 0.90;
 % We first perform FPCA on both d and h
 PriorData.spline=[3 40]; % 3rd order spline with 40 knots
 PriorDataFPCA = ComputeHarmonicScores(PriorData,[],4);
+
+
 PriorPrediction.spline=[3 20]; % 3rd order spline with 20 knots
 PriorPredictionFPCA = ComputeHarmonicScores(PriorPrediction,[],4);
 
 % Perform Mixed PCA on FPCA components for d
 rmpath('../src/thirdparty/fda_matlab/');
-[d_f, dobs_fpca] = MixedPCA(PriorDataFPCA,TruthRealization,EigenTolerance);
+[d_f, dobs_fpca] = MixedPCA(PriorDataFPCA,TruthRealization,EigenTolerance, ...
+    FigureFolder);
 addpath('../src/thirdparty/fda_matlab/');
 
 % Get number of FPCA components to keep for h
@@ -87,8 +108,13 @@ PlotLowDimModels(d_f,h_f,dobs_fpca,'f',FontSize);
 [A, B, ~, d_c,h_c] = canoncorr(d_f,h_f);
 dobs_c=(dobs_fpca-mean(d_f))*A;
 
-% Plot prior models in canonical space
+% Plot prior models in canonical space (d versus h)
 PlotLowDimModels(d_c,h_c,dobs_c,'c',FontSize);
+
+% Plot the data in cannonical Space  including DObs
+% this is to check whether they are gaussian
+PlotDataCanonicalSpace1D(d_c,dobs_c,'c',FontSize, FigureFolder);
+
 
 % Apply a normal score transform to the h_c
 h_c_gauss = NormalScoreTransform(h_c,0);
@@ -106,11 +132,12 @@ mu_prior = mean(h_c_gauss)';
  mu_posterior = mu_prior + C_H*G'*pinv(G*C_H*G' + C_T)*(dobs_c'-G*mu_prior);
 C_posterior = inv(G'*pinv(C_T)*G + inv(C_H));
 
+
 %% Generate samples from the posterior in canonical space
 addpath('../src/thirdparty/fda_matlab/');
 NumPosteriorSamples = 100;
 h_c_post = SampleCanonicalPosterior(mu_posterior,C_posterior,...
-    NumPosteriorSamples,h_c);
+    NumPosteriorSamples,h_c, FigureFolder);
 
 % Undo the CCA and FPCA transformations
 h_reconstructed = UndoCanonicalFunctional(h_c_post, B, h_f,...
@@ -120,6 +147,6 @@ h_reconstructed = UndoCanonicalFunctional(h_c_post, B, h_f,...
 [PriorQuantiles, PosteriorQuantiles] = ComputeQuantiles(...
     PriorPrediction.data, h_reconstructed');
 PlotPosteriorSamplesAndQuantiles(PriorPrediction,TruthRealization, ...
-    h_reconstructed',PriorQuantiles,PosteriorQuantiles);
+    h_reconstructed',PriorQuantiles,PosteriorQuantiles, FigureFolder);
 
 

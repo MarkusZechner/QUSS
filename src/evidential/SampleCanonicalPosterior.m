@@ -1,5 +1,5 @@
 function [h_c_post] = SampleCanonicalPosterior( ...
-    mu_posterior, C_posterior, NumPosteriorSamples, h_c )
+    mu_posterior, C_posterior, NumPosteriorSamples, h_c, FigureFolder )
 %SampleCanonicalPosterior Generate samples of the canonical posterior (that
 %is sampled from f(h|d_obs), and reconstructs the time series
 %
@@ -31,6 +31,9 @@ PosteriorSamplesTransformed(2,:),60,'b','filled');
 legend([h1(1),h2(1)],'Prior','Posterior');
 ylabel('h^c_2','FontSize',FontSize); xlabel('h^c_1','FontSize',FontSize)
 set(gca,'FontSize',FontSize); axis tight; set(gcf,'color','w');
+
+export_fig([FigureFolder 'PriorPosteriorComparison2D'],'-m4','-transparent');
+
 
 h_c_post = PosteriorSamplesTransformed;
 end

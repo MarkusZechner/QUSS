@@ -1,10 +1,16 @@
-function [ PriorDataPCA ] = ComputePCA(PriorData, eigentolerance,eigenToKeep, PlotLevel)
+function [ PriorDataPCA ] = ComputePCA(PriorData, eigentolerance,eigenToKeep, PlotLevel, ...
+    Type, FigureFolder)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 
 % Author: Markus Zechner (mzechner@stanford.edu)
 % Date: March 24th 2018
 
+if (nargin < 6)
+    SaveOn = false;
+else
+    SaveOn = true;
+end
 
 PriorDataPCA = {};
 
@@ -42,6 +48,11 @@ if PlotLevel == 1
     xlabel('Number of Eigencomponents');
     ylabel('Variance Explained');
     
+    if SaveOn == true
+        figure_name=['VarianceExplained_' Type];
+        export_fig([FigureFolder figure_name], '-png','-m3');
+    end
+    
     % Computing how many Eigenvalues are needed for a given variance
     % explained
     
@@ -50,7 +61,7 @@ if PlotLevel == 1
     else
         ix = eigentolerance;
     end
-
+    
     % undoing PCA
     
     Xhat = PriorDataPCA{RandomWell}.score(:,1:ix) * PriorDataPCA{RandomWell}.coeff(:,1:ix)';
@@ -70,6 +81,10 @@ if PlotLevel == 1
     xlabel('Time (days)');
     ylabel(PriorData.name);
     
+    if SaveOn == true
+        figure_name=['Reconstruction' Type];
+        export_fig([FigureFolder figure_name], '-png','-m3');
+    end
     
 end
 

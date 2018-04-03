@@ -1,4 +1,4 @@
-function [ h ] = PlotLowDimModels(D,H,DObs,Type,FontSize)
+function [ h ] = PlotLowDimModels(D,H,DObs,Type,FontSize,FigureFolder)
 %PLOTLOWDIMMODELS Plot a low dimensional projection of the reservoir models
 %
 %   Plot the models in some low dimension space according to data and
@@ -31,7 +31,7 @@ for i=1:NumDimensions
         h=figure('Units', 'normalized', 'Position', [0,0,1,1]);
     end
     
-    subplot(NumPlots/MaxPlotPerRow,MaxPlotPerRow,mod(i-1,NumPlots)+1);
+    h = subplot(NumPlots/MaxPlotPerRow,MaxPlotPerRow,mod(i-1,NumPlots)+1);
     hold on;
     scatter(D(:,i),H(:,i),ScatterSize,'filled')
     plot([DObs(i),DObs(i)],[min(H(:,i)),max(H(:,i))],'r-',...
@@ -47,8 +47,10 @@ for i=1:NumDimensions
     set(gca,'FontSize',FontSize);
     axis square; axis tight;
     set(gcf,'color','w');
-    
+
+  
 end
 
+    
 end
 

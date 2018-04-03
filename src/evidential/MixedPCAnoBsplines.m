@@ -1,5 +1,5 @@
 function [mpca_scores, mpca_obs] = MixedPCAnoBsplines(FunctionalStruct,truth_real,...
-    eigentolerance)
+    eigentolerance, SavePath)
 %MIXEDPCA Computes Mixed PCA of a PCA Object
 %
 % Inputs:
@@ -16,6 +16,12 @@ function [mpca_scores, mpca_obs] = MixedPCAnoBsplines(FunctionalStruct,truth_rea
 % Date: May 24th 2016
 % Update: March 24th 2018
 
+if (nargin < 4)
+    SaveOn = false;
+else
+    SaveOn = true;
+end
+
 % This is the number of variables
 num_wells = length(FunctionalStruct);
 
@@ -25,10 +31,10 @@ norm_scores = [];
 for i = 1:num_wells
     % Perform regular PCA on each well
     %[~,~,latent] = pca(FunctionalStruct{i}.score);
-
+    
     % Normalize the PCA scores by the first singular value, which is the
     norm_score = FunctionalStruct{i}.score/sqrt(FunctionalStruct{i}.latent(1));
-
+    
     % Concanate the norm_score
     norm_scores = [norm_scores norm_score];
 end
@@ -40,11 +46,15 @@ end
 explained = cumsum(explained)/sum(explained);
 
 
-    plot(explained,'LineWidth',3)
-    set(gcf,'color','w');
-    %ylim([0 1])
-    xlabel('Number of Eigencomponents');
-    ylabel('Variance Explained');
+plot(explained,'LineWidth',3)
+set(gcf,'color','w');
+%ylim([0 1])
+xlabel('Number of Eigencomponents');
+ylabel('Variance Explained');
+
+if SaveOn == true
+    export_fig([SavePath 'VarianceExplainedMixedPCA'], '-png','-m3');
+end
 
 % Check number of components to keep
 eigenToKeep = 3;

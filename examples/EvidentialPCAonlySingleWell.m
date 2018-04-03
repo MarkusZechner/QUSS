@@ -1,3 +1,11 @@
+
+% This script is an example for:
+% Wells - single Well or 
+% Field - single Well
+% using PCA as the dim reduction method
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 % Evidential.m
 % Tutorial file on how to use Evidential Learning for forecasting future
 % prediction rates from historical production rates.
@@ -8,21 +16,31 @@
 
 close all; clear all; clc;
 addpath('../src/evidential/');
+addpath('../src/thirdparty/export_fig/');
+
 prior_path = '../data/evidential/PriorData.mat';
 load(prior_path);
 prior_path = '../data/evidential/PriorPrediction.mat';
 load(prior_path);
 
-%prior_path = '../data/evidential/Prior.mat';
-%load(prior_path);
+
+% Saving the images
+BasePath = 'C:\Users\Markus Zechner\Documents\GitHub\QUSS\figures\EvidentialLearning';
+Case = 'OMV8TH_largerPrior';
+% Trial is a subfolder of Case
+Trial = 'AllWellsToSingleWell_PCAonly_EigenTol095';
 
 %% using only one well
-WellToKeep = 30;
+WellToKeep = 30; % 68
 ObservedWellDataPrediction = PriorPrediction.data(1,:,WellToKeep);
 SimulatedWellDataPrediction = PriorPrediction.data(2:end,:,WellToKeep);
 PriorPrediction.data = [ObservedWellDataPrediction;SimulatedWellDataPrediction];
 WellName = PriorPrediction.ObjNames{1,WellToKeep}
 PriorPrediction.ObjNames = {WellName};
+
+% creating the figure folder
+SaveFig = 'On';
+[ FigureFolder ] = creatingFigureFolder(SaveFig, BasePath, Case, Trial, PriorPrediction.ObjNames);
 
 
 
@@ -48,14 +66,17 @@ AvailableRealizations = setdiff(1:NumPriorRealizations,TruthRealization);
 MinEigenValues = 3; EigenTolerance = 0.95;
 
 % Performing PCA on the time signal directly (no B-splines)on both d and h
+rmpath('../src/thirdparty/fda_matlab/');
 PlotLevel = 1; % 1=yes, 2=no
-PriorDataPCA = ComputePCA(PriorData, EigenTolerance, MinEigenValues, PlotLevel );
+PriorDataPCA = ComputePCA(PriorData, EigenTolerance, MinEigenValues, PlotLevel, ...
+    'Data', FigureFolder );
 
-PriorPredictionPCA = ComputePCA(PriorPrediction, EigenTolerance, MinEigenValues, PlotLevel );
+PriorPredictionPCA = ComputePCA(PriorPrediction, EigenTolerance, MinEigenValues, PlotLevel, ...
+    'Prediction', FigureFolder );
 
 % Perform Mixed PCA on FPCA components for d
 
-[d_f, dobs_fpca] = MixedPCAnoBsplines(PriorDataPCA, TruthRealization, EigenTolerance);
+[d_f, dobs_fpca] = MixedPCAnoBsplines(PriorDataPCA, TruthRealization, EigenTolerance, FigureFolder);
 
 % Get number of FPCA components to keep for h
 nEigenvalues = GetNumEigenvalues(PriorPredictionPCA{1}, MinEigenValues, ...
@@ -73,6 +94,11 @@ dobs_c=(dobs_fpca-mean(d_f))*A;
 
 % Plot prior models in canonical space
 PlotLowDimModels(d_c,h_c,dobs_c,'c',FontSize);
+
+% Plot the data in cannonical Space  including DObs
+% this is to check whether they are gaussian
+PlotDataCanonicalSpace1D(d_c,dobs_c,'c',FontSize, FigureFolder);
+
 
 % Apply a normal score transform to the h_c
 h_c_gauss = NormalScoreTransform(h_c,0);
@@ -94,7 +120,7 @@ C_posterior = inv(G'*pinv(C_T)*G + inv(C_H));
 %addpath('../src/thirdparty/fda_matlab/');
 NumPosteriorSamples = 100;
 h_c_post = SampleCanonicalPosterior(mu_posterior,C_posterior,...
-    NumPosteriorSamples,h_c );
+    NumPosteriorSamples,h_c, FigureFolder );
 
 % Undo the CCA and PCA transformations
 h_reconstructed = UndoCanonicalAndPCA(h_c_post, B, h_f,...

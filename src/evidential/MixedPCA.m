@@ -1,5 +1,5 @@
 function [mpca_scores, mpca_obs] = MixedPCA(FunctionalStruct,truth_real,...
-    eigentolerance)
+    eigentolerance, FigureFolder)
 %MIXEDPCA Computes Mixed PCA of a FPCA Object
 %
 % Inputs:
@@ -13,6 +13,13 @@ function [mpca_scores, mpca_obs] = MixedPCA(FunctionalStruct,truth_real,...
 %
 % Author: Lewis Li (lewisli@stanford.edu)
 % Date: May 24th 2016
+
+if (nargin < 4)
+    SaveOn = false;
+else
+    SaveOn = true;
+end
+
 
 % This is the number of variables
 num_wells = length(FunctionalStruct);
@@ -42,6 +49,10 @@ set(gcf,'color','w');
 %ylim([0 1])
 xlabel('Number of Eigencomponents');
 ylabel('Variance Explained');
+
+if SaveOn == true
+    export_fig([FigureFolder 'ScreeMixedPCA'],'-m4','-transparent');
+end
 
 % Check number of components to keep
 eigenToKeep = 3;

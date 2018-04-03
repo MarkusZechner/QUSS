@@ -90,6 +90,10 @@ for r = 1:NumResponses
         set(gca,'FontSize',FontSize);
         set(gcf,'color','w');
         set(hEigen, 'Units', 'normalized', 'Position', [0,0,0.75,0.75]);
+        
+        % saving the figure
+        %export_fig([FigureFolder 'ScreePlot'],'-m4','-transparent');
+        
     end
     
     if (PlotLevel == 3 || PlotLevel == 4 && r == 1)
@@ -102,7 +106,7 @@ for r = 1:NumResponses
         title(['Realization ' num2str(i) ' ' DataStruct.ObjNames{r}]);
         axis square; axis tight;
         set(gca,'FontSize',FontSize);
-       
+        %export_fig([FigureFolder 'Random1'],'-m4','-transparent');
         
         i = randi([1 size(CurrentResponse,2)]);
         subplot(1,2,2);
@@ -112,6 +116,7 @@ for r = 1:NumResponses
         set(gca,'FontSize',FontSize);
         axis square; axis tight;
         set(h2, 'Units', 'normalized', 'Position', [0,0,0.75,0.75]);
+        %export_fig([FigureFolder 'Random2'],'-m4','-transparent');
     end
 end
 
