@@ -43,7 +43,8 @@ PriorPredictionPCA = ComputePCADataAnalysis(PriorPrediction, EigenTolerance, Min
 
 % Concatinating the matrix
 
-NumberOfEigenValues = 1;
+NumberOfEigenValuesData = 2;
+NumberOfEigenValuesPrediction = 31;
 TruthRealization = 1;
 Normalize = true;
 WellNumber = 68;
@@ -51,8 +52,12 @@ FontSize = 20;
 
 % concatinate PCA scores of all wells and remove truth
 [pca_scores_data] = ConcatinatePCAMatrix(PriorDataPCA,TruthRealization,...
-    NumberOfEigenValues, Normalize);
+    NumberOfEigenValuesData, Normalize);
 
+% if more than 1 PCA Component is used, the wellnames have to be adjusted
+
+[ NewWellNames ] = MakeNewWellNames( PriorData, NumberOfEigenValuesData );
+PriorData.ObjNames = NewWellNames;
 % ploting the Data of the selected well
 PlotWellResponses(PriorData,TruthRealization,WellNumber, FontSize)
 
@@ -61,7 +66,7 @@ PlotWellResponses(PriorPrediction,TruthRealization,WellNumber, FontSize)
 
 % get PCA scores for a specific well and remove the truth
 [pca_scores_well] = getPCAscoresPrediction(PriorPredictionPCA, ...
-    TruthRealization, NumberOfEigenValues,WellNumber);
+    TruthRealization, NumberOfEigenValuesPrediction,WellNumber);
 
 % computing the distance between the prediction responses (selected well)
 
@@ -73,5 +78,5 @@ DGSA.ParametersValues = pca_scores_data;
 DGSA.D = Distance;
 DGSA.N = size(PriorData.data,1)-1;
 
-save('C:\Users\Markus Zechner\Documents\GitHub\QUSS\data\evidential\DistanceM.mat','DGSA');
+save('C:\Users\Markus Zechner\Documents\GitHub\QUSS\data\evidential\DistanceMAllComp2.mat','DGSA');
 

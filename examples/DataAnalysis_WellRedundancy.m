@@ -72,6 +72,8 @@ end
 
 cumexplained = cumsum(explained)/sum(explained);
 plot(cumexplained)
+xlabel('Number of Eigenvalues');
+ylabel('Variance Explained');
 
 scatter3(score(:,1),score(:,2),score(:,3))
 
@@ -88,6 +90,7 @@ rho_vector = sort(reshape(UpperRho,1, []));
 NonZeroIndex = find(rho_vector>0);
 rho_vector = rho_vector(NonZeroIndex);
 cdfplot(rho_vector)
+xlabel('Correlation Coefficient of Canonical Correlation in 1st dimension')
 size(rho_vector)
 
 %testumnner = (NbOperations-1)/2
