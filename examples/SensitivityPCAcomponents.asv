@@ -57,7 +57,7 @@ FontSize = 20;
 % if more than 1 PCA Component is used, the wellnames have to be adjusted
 
 [ NewWellNames ] = MakeNewWellNames( PriorData, NumberOfEigenValuesData );
-PriorData.NewWellNames
+PriorData.ObjNames = NewWellNames;
 % ploting the Data of the selected well
 PlotWellResponses(PriorData,TruthRealization,WellNumber, FontSize)
 
@@ -78,5 +78,5 @@ DGSA.ParametersValues = pca_scores_data;
 DGSA.D = Distance;
 DGSA.N = size(PriorData.data,1)-1;
 
-save('C:\Users\Markus Zechner\Documents\GitHub\QUSS\data\evidential\DistanceMAllComp.mat','DGSA');
+save('C:\Users\Markus Zechner\Documents\GitHub\QUSS\data\evidential\DistanceMAllComp2.mat','DGSA');
 
